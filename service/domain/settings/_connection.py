@@ -18,7 +18,7 @@ class BaseConnectionSettings(ActiveEnvironment):
     extras: ExtraSettings = ExtraSettings(instant_client=None)
 
     class Config:
-        allow_mutation = False
+        allow_mutation = True
         env_nested_delimiter = '__'
 
     @validator('google', always=True)
@@ -29,6 +29,10 @@ class BaseConnectionSettings(ActiveEnvironment):
             # fixme : raise Pydantic Error
             raise ValueError('Accepts either password or a google secret')
 
+    def retrieve_password(self):
+        if self.password is None:
+            self.password = SecretStr(self.google.retrieve_password())
+
 
 if __name__ == '__main__':
-    print(BaseConnectionSettings().json())
+    print(BaseConnectionSettings())
