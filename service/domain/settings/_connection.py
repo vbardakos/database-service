@@ -1,15 +1,15 @@
 from pydantic import SecretStr, Field, validator
 from typing import Annotated, Any
 
+from service.domain.types import SchemaPyObject
 from service.domain.settings._active import ActiveEnvironment
 from service.domain.settings._secret import GoogleSecret
 from service.domain.settings._extras import ExtraSettings
 
 
 class BaseConnectionSettings(ActiveEnvironment):
-    # fixme : type
     user: Annotated[str, Field(min_length=4)]
-    type: Any | None
+    type: SchemaPyObject
     password: SecretStr | None
     port: Annotated[int | None, Field(ge=1000, le=99999)]
     host: Annotated[str, Field(min_length=4)]
@@ -29,10 +29,12 @@ class BaseConnectionSettings(ActiveEnvironment):
             # fixme : raise Pydantic Error
             raise ValueError('Accepts either password or a google secret')
 
+    @validator('type', always=True)
+    def check_type(cls, adapter):
+        _, _, name = cls.Config.env_prefix.rstrip('_').rpartition('_')
+        adapter = adapter(name)
+        return adapter
+
     def retrieve_password(self):
         if self.password is None:
             self.password = SecretStr(self.google.retrieve_password())
-
-
-if __name__ == '__main__':
-    print(BaseConnectionSettings())
