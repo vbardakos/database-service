@@ -1,0 +1,11 @@
+oracledb
+environs>=9.3.4
+pip>=21.3.1
+psycopg>=3.0.7
+psycopg-binary>=3.0.7
+setuptools>=60.0.3
+google-cloud-bigquery>=2.31.0
+pydantic>=1.10.2
+datamodel-code-generator>=0.14.0
+sqlparse>=0.4.3
+sqlalchemy>=1.4.44

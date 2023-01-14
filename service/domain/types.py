@@ -25,6 +25,7 @@ class SchemaPyObject(PyObject):
 
 class FlexDirectoryPath(DirectoryPath):
     _flavour = Path()._flavour
+
     @classmethod
     def __get_validators__(cls):
         yield cls.validate
@@ -41,6 +42,14 @@ class FlexDirectoryPath(DirectoryPath):
         else:
             raise PathNotExistsError(path=path)
 
+    @classmethod
+    def validated_join(cls, init: Path, *joins: str):
+        if joins:
+            join, *joins = joins
+            return cls.validated_join(cls.validate(init / join), *joins)
+        else:
+            return init
+
 
 if __name__ == '__main__':
     from pathlib import Path
@@ -49,5 +58,6 @@ if __name__ == '__main__':
     class A(BaseModel):
         x: FlexDirectoryPath
 
-    path = Path('../../src')
-    print(A(x=path))
+    path = Path('../../service')
+    a = A(x=path)
+    print(FlexDirectoryPath.validated_join(a.x, 'domain', 'adapters'))

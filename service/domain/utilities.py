@@ -2,7 +2,6 @@ import json
 from dotenv import find_dotenv
 from functools import lru_cache
 from typing import Callable, Any, Generator
-from types import ModuleType
 
 
 def dict_deep_mapper(obj: dict, mapper: Callable[[Any], Any]) -> Generator:
@@ -14,12 +13,20 @@ def dict_deep_mapper(obj: dict, mapper: Callable[[Any], Any]) -> Generator:
 
 
 def pyobject_string(obj: Any):
-    if isinstance(obj, ModuleType):
-        return obj.__module__
-    elif isinstance(obj, Callable):
+    if hasattr(obj, '__name__'):
         return '.'.join([obj.__module__, obj.__name__]).replace('__main__.', '')
+    elif hasattr(obj, '__call__'):
+        return '.'.join([obj.__module__, type(obj).__name__]).replace('__main__.', '')
     else:
         return obj
+
+
+def get_logger(name: str):
+    import logging
+    logger = logging.getLogger(name)
+    logger.setLevel('DEBUG')
+    logger.addHandler(logging.StreamHandler())
+    return logger
 
 
 def jsonify(*mappers: Callable[[Any], Any]):
